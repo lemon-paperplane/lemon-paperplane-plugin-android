@@ -1,0 +1,14 @@
+apply plugin: 'com.android.application'
+apply from: '../shared/common.gradle'
+
+android {
+    namespace "com.unity.like"
+    ndkPath "/nonexistent/Unity/NDK"
+    ndkVersion "27.2.12479018"
+    compileSdk 35
+    buildToolsVersion = "36.0.0"
+    defaultConfig {
+        applicationId "com.unity.like"
+        minSdk 29
+    }
+}

@@ -1,0 +1,410 @@
+{
+  "id": "android",
+  "name": "%plugin.name%",
+  "version": "0.1.0",
+  "vendor": "Lemon Paperplane",
+  "description": "%plugin.description%",
+  "icon": "icons/android.svg",
+  "category": "framework",
+  "engines": {
+    "paperplane": ">=0.1.0 <0.2.0"
+  },
+  "protocol": 1,
+  "executable": "bin/paperplane-plugin-android",
+  "dependencies": [
+    {
+      "id": "gradle"
+    }
+  ],
+  "activation": {
+    "facets": [
+      "gradle"
+    ]
+  },
+  "contributes": {
+    "facets": [
+      {
+        "id": "android",
+        "name": "Android",
+        "icon": "icons/android.svg",
+        "category": "framework",
+        "priority": 60
+      }
+    ],
+    "runConfigurationTypes": [
+      {
+        "id": "android-app",
+        "name": "%runType.app%",
+        "icon": "icons/android.svg",
+        "facets": [
+          "android"
+        ],
+        "options": [
+          {
+            "key": "module",
+            "title": "%opt.module%",
+            "type": "select",
+            "optionsFrom": "android.modules",
+            "required": true
+          },
+          {
+            "key": "variant",
+            "title": "%opt.variant%",
+            "type": "select",
+            "optionsFrom": "android.variants",
+            "default": "debug"
+          },
+          {
+            "key": "device",
+            "title": "%opt.device%",
+            "type": "select",
+            "optionsFrom": "android.devices",
+            "info": "%opt.device.info%",
+            "live": true
+          },
+          {
+            "key": "activity",
+            "title": "%opt.activity%",
+            "type": "string",
+            "placeholder": ".MainActivity",
+            "info": "%opt.activity.info%",
+            "advanced": true
+          },
+          {
+            "key": "forceStop",
+            "title": "%opt.forceStop%",
+            "type": "boolean",
+            "default": true,
+            "info": "%opt.forceStop.info%",
+            "advanced": true
+          }
+        ]
+      }
+    ],
+    "settings": [
+      {
+        "key": "emulatorArgs",
+        "title": "%setting.emulatorArgs%",
+        "type": "string",
+        "placeholder": "-no-snapshot-load",
+        "info": "%setting.emulatorArgs.info%"
+      }
+    ],
+    "actions": [
+      {
+        "id": "openInStudio",
+        "title": "%action.openStudio%",
+        "icon": "builtin:square-arrow-out-up-right",
+        "facets": [
+          "android"
+        ],
+        "group": "open",
+        "locations": [
+          "project.menu",
+          "card.menu"
+        ]
+      },
+      {
+        "id": "buildRelease",
+        "title": "%action.buildRelease%",
+        "icon": "builtin:package",
+        "facets": [
+          "android"
+        ],
+        "group": "build",
+        "locations": [
+          "project.menu"
+        ],
+        "form": [
+          {
+            "key": "module",
+            "title": "%opt.module%",
+            "type": "select",
+            "optionsFrom": "android.modules"
+          },
+          {
+            "key": "format",
+            "title": "%opt.format%",
+            "type": "select",
+            "default": "apk",
+            "options": [
+              {
+                "value": "apk",
+                "label": "%opt.format.apk%"
+              },
+              {
+                "value": "aab",
+                "label": "%opt.format.aab%"
+              }
+            ]
+          },
+          {
+            "key": "variant",
+            "title": "%opt.variant%",
+            "type": "select",
+            "optionsFrom": "android.variants",
+            "default": "release"
+          }
+        ]
+      }
+    ],
+    "diagnostics": [
+      {
+        "id": "android.install-update-incompatible",
+        "hint": "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
+        "pattern": "INSTALL_FAILED_UPDATE_INCOMPATIBLE(?:.*?[Pp]ackage ([A-Za-z][\\w.]*))?",
+        "severity": "error",
+        "title": "%diag.signature.title%",
+        "message": "%diag.signature.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "uninstall",
+            "title": "%fix.uninstall%",
+            "kind": "custom",
+            "params": {
+              "package": "{1}"
+            },
+            "recommended": true,
+            "confirm": "%confirm.uninstall%"
+          }
+        ]
+      },
+      {
+        "id": "android.install-version-downgrade",
+        "hint": "INSTALL_FAILED_VERSION_DOWNGRADE",
+        "pattern": "INSTALL_FAILED_VERSION_DOWNGRADE(?:.*?[Pp]ackage ([A-Za-z][\\w.]*))?",
+        "severity": "error",
+        "title": "%diag.downgrade.title%",
+        "message": "%diag.downgrade.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "uninstall",
+            "title": "%fix.uninstall%",
+            "kind": "custom",
+            "params": {
+              "package": "{1}"
+            },
+            "recommended": true,
+            "confirm": "%confirm.uninstall%"
+          }
+        ]
+      },
+      {
+        "id": "android.install-insufficient-storage",
+        "hint": "INSTALL_FAILED_INSUFFICIENT_STORAGE",
+        "pattern": "INSTALL_FAILED_INSUFFICIENT_STORAGE",
+        "severity": "error",
+        "title": "%diag.storage.title%",
+        "message": "%diag.storage.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "retry",
+            "title": "%fix.retry%",
+            "kind": "restart"
+          }
+        ]
+      },
+      {
+        "id": "android.install-user-restricted",
+        "hint": "INSTALL_FAILED_USER_RESTRICTED",
+        "pattern": "INSTALL_FAILED_USER_RESTRICTED",
+        "severity": "error",
+        "title": "%diag.userRestricted.title%",
+        "message": "%diag.userRestricted.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "retry",
+            "title": "%fix.retry%",
+            "kind": "restart",
+            "recommended": true
+          }
+        ]
+      },
+      {
+        "id": "android.install-no-matching-abis",
+        "hint": "INSTALL_FAILED_NO_MATCHING_ABIS",
+        "pattern": "INSTALL_FAILED_NO_MATCHING_ABIS(?::\\s*(.*))?",
+        "severity": "error",
+        "title": "%diag.abi.title%",
+        "message": "%diag.abi.message%",
+        "facets": [
+          "android"
+        ]
+      },
+      {
+        "id": "android.install-older-sdk",
+        "hint": "INSTALL_FAILED_OLDER_SDK",
+        "pattern": "INSTALL_FAILED_OLDER_SDK",
+        "severity": "error",
+        "title": "%diag.olderSdk.title%",
+        "message": "%diag.olderSdk.message%",
+        "facets": [
+          "android"
+        ]
+      },
+      {
+        "id": "android.device-unauthorized",
+        "hint": "unauthorized",
+        "pattern": "(?:device unauthorized|DeviceException:.*unauthorized)",
+        "severity": "error",
+        "title": "%diag.unauthorized.title%",
+        "message": "%diag.unauthorized.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "retry",
+            "title": "%fix.retry%",
+            "kind": "restart",
+            "recommended": true
+          }
+        ]
+      },
+      {
+        "id": "android.licenses",
+        "hint": "accepted",
+        "pattern": "(?:licen[cs]es? (?:have|has) not been accepted|You have not accepted the license agreements|License for package .* not accepted)",
+        "severity": "error",
+        "title": "%diag.licenses.title%",
+        "message": "%diag.licenses.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "acceptLicenses",
+            "title": "%fix.acceptLicenses%",
+            "kind": "custom",
+            "recommended": true,
+            "confirm": "%confirm.licenses%"
+          }
+        ]
+      },
+      {
+        "id": "android.missing-target",
+        "hint": "Failed to find target with hash string",
+        "pattern": "Failed to find target with hash string '(android-[\\w.\\-]+)'",
+        "severity": "error",
+        "title": "%diag.missingPlatform.title%",
+        "message": "%diag.missingPlatform.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "installPackages",
+            "title": "%fix.installPlatform%",
+            "kind": "custom",
+            "params": {
+              "packages": "platforms;{1}"
+            },
+            "recommended": true,
+            "confirm": "%confirm.installPlatform%"
+          }
+        ]
+      },
+      {
+        "id": "android.missing-platform",
+        "hint": "Failed to find Platform SDK",
+        "pattern": "Failed to find Platform SDK with path: platforms;(android-[\\w.\\-]+)",
+        "severity": "error",
+        "title": "%diag.missingPlatform.title%",
+        "message": "%diag.missingPlatform.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "installPackages",
+            "title": "%fix.installPlatform%",
+            "kind": "custom",
+            "params": {
+              "packages": "platforms;{1}"
+            },
+            "recommended": true,
+            "confirm": "%confirm.installPlatform%"
+          }
+        ]
+      },
+      {
+        "id": "android.missing-build-tools",
+        "hint": "Failed to find Build Tools revision",
+        "pattern": "Failed to find Build Tools revision (\\d+(?:\\.\\d+)*(?:-rc\\d+)?)",
+        "severity": "error",
+        "title": "%diag.missingBuildTools.title%",
+        "message": "%diag.missingBuildTools.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "installPackages",
+            "title": "%fix.installBuildTools%",
+            "kind": "custom",
+            "params": {
+              "packages": "build-tools;{1}"
+            },
+            "recommended": true,
+            "confirm": "%confirm.installBuildTools%"
+          }
+        ]
+      },
+      {
+        "id": "android.ndk-version",
+        "hint": "No version of NDK matched",
+        "pattern": "No version of NDK matched the requested version (\\d+(?:\\.\\d+)*)",
+        "severity": "error",
+        "title": "%diag.ndkVersion.title%",
+        "message": "%diag.ndkVersion.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "installPackages",
+            "title": "%fix.installNdkVersion%",
+            "kind": "custom",
+            "params": {
+              "packages": "ndk;{1}"
+            },
+            "recommended": true,
+            "confirm": "%confirm.installNdkVersion%"
+          }
+        ]
+      },
+      {
+        "id": "android.ndk-missing",
+        "hint": "NDK",
+        "pattern": "NDK not configured|NDK is not installed|NDK at .* did not have a source\\.properties file",
+        "severity": "error",
+        "title": "%diag.ndkMissing.title%",
+        "message": "%diag.ndkMissing.message%",
+        "facets": [
+          "android"
+        ],
+        "fixes": [
+          {
+            "id": "installNdk",
+            "title": "%fix.installNdk%",
+            "kind": "custom",
+            "recommended": true,
+            "confirm": "%confirm.installNdk%"
+          }
+        ]
+      }
+    ]
+  }
+}

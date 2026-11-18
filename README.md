@@ -1,0 +1,14 @@
+# lemon-paperplane-plugin-android
+
+Lemon Paperplane 的安卓插件（依赖 gradle 插件）。
+
+- 识别：由 gradle facet 激活。Gradle 根下有应用了 `com.android.application` 的子工程（`plugins {}` / `apply plugin` / 版本目录 `alias(...)`，`apply false` 不算；约定插件写法看 `android { defaultConfig { applicationId } }`）时，给该 Gradle 模块加 facet `android`。
+- 分析（静态，只读文件）：逐个解析安卓子工程的 build.gradle(.kts)（展开一层 `apply from:`）：namespace、applicationId、buildType 的 applicationIdSuffix、compileSdk（`compileSdk 35`、`compileSdk = 35`、`compileSdkVersion 'android-35'`、`compileSdk { version = release(36) { minorApiLevel = 1 } }`、`compileSdkPreview`、变量 / `libs.versions.x`）、minSdk、targetSdk、ndkVersion、ndkPath、buildToolsVersion、buildTypes、productFlavors 与 flavorDimensions（推算变体与包名）。
+- Android SDK：local.properties 的 sdk.dir → ANDROID_HOME → ANDROID_SDK_ROOT → 各平台默认位置。静态问题：没有 SDK、sdk.dir 指向不存在的目录、只在默认位置找到（Gradle 自己找不到）、缺平台 / 指定的 build-tools / NDK / platform-tools、ndkPath 不存在、没有 cmdline-tools。安装类修复都要用户确认（含 Android SDK 许可协议说明），在任务里执行，输出进任务控制台。
+- cmdline-tools：从 `repository2-3.xml` 取本机平台的 `cmdline-tools;latest` 与 sha1，安装包按镜像区域先试腾讯云镜像、再试 dl.google.com，校验 sha1 后解压到 `<sdk>/cmdline-tools/latest`。之后用它装缺的包：cmdline-tools 23 起 `sdkmanager` 只是 Android CLI（`bin/android`）的外壳，这时直接调 `android --no-metrics --sdk=<sdk> sdk install a/b`（国内加 `--sdk_url/--sdk_index` 走镜像，失败退回官方源）；老版本 sdkmanager 用 `--sdk_root`，代理环境变量转成 `--proxy*` 参数，许可确认从 stdin 回答。
+- 运行配置 `android-app`（每个应用子工程一个）：模块、构建变体（默认 debug）、设备（空为自动，`avd:<名字>` 为模拟器）、启动 Activity（空则自动解析）、停止时 force-stop（默认是）。
+- 运行：选设备（指定序列号 / `avd:名字` 启动模拟器并等 `sys.boot_completed` 与包管理服务 / 自动：恰好一台在线就用它，没有在线且恰好一个 AVD 就启动它）→ 调 gradle 插件服务 `runTasks` 执行 `<模块>:install<Variant>`（`ANDROID_SERIAL` 指定设备；SDK 只在默认位置时一并传 `ANDROID_HOME`/`ANDROID_SDK_ROOT`）→ 包名优先读 `build/outputs/apk/.../output-metadata.json` → 交给插件自带的运行器（`__run`）。
+- 运行器：`cmd package resolve-activity` 解析启动 Activity → `am start -W -S` → `pidof` 取进程号（老系统退回 `ps`）→ 打印就绪行（LaunchSpec.ReadyPatterns 用同一份文案生成）→ `logcat --pid -v threadtime -v color` 实时输出；每 2 秒查进程：退出就结束（看到 FATAL EXCEPTION 时退出码 1，内核会做诊断），进程号变了就跟随；SIGTERM / SIGINT 时按设置 `am force-stop`；设备断开时说明原因、退出码 2。模拟器带窗口启动、脱离插件进程，运行停止后不关。
+- 诊断：声明式规则覆盖 INSTALL_FAILED_UPDATE_INCOMPATIBLE / VERSION_DOWNGRADE（修复：确认后卸载旧版再重跑，设备取这个运行配置上次安装用的那台）、INSUFFICIENT_STORAGE、USER_RESTRICTED（小米等「USB 安装」）、NO_MATCHING_ABIS、OLDER_SDK、设备未授权、许可未接受（确认后接受）、缺平台 / build-tools / NDK 版本、NDK 未配置。`run/diagnose` 补充：选设备失败时每台设备 / 每个模拟器给一个「用 X 运行」（setRunOption device）；SDK location not found（找到 SDK 就设 ANDROID_HOME，否则下载安装）；应用崩溃（异常与堆栈）；Gradle 失败时把 `* What went wrong` 原文显示出来（settings.gradle / build.gradle 抛出的 GradleException 总是显示）。
+- 动作：在 Android Studio 中打开（macOS `open -a`，Windows `studio64.exe`，Linux `studio.sh`，含 JetBrains Toolbox；没装时打开官网下载页）；构建签名包（表单选模块、APK / AAB、变体，经 gradle 插件 `runTasks` 在任务里执行 `assemble<Variant>` / `bundle<Variant>`，列出产物，未配置签名时提示）。
+- 设置：模拟器启动参数（如 `-no-snapshot-load`、`-gpu host`）。

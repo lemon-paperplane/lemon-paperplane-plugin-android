@@ -1,0 +1,3 @@
+rootProject.name = 'UnityLike'
+include ':launcher'
+include ':unityLibrary'

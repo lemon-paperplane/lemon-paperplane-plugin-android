@@ -1,0 +1,38 @@
+plugins {
+    id 'com.android.application'
+}
+/* 块注释里的 applicationId "com.fake" 不算 */
+android {
+    namespace 'com.example.groovy'
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion "34.0.0"
+    ndkVersion "26.1.10909125"
+    defaultConfig {
+        applicationId "com.example.groovy"   // 行尾注释
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion targetSdkLevel.toInteger()
+    }
+    flavorDimensions "tier", "abi"
+    productFlavors {
+        free { dimension "tier"; applicationIdSuffix ".free" }
+        paid {
+            dimension "tier"
+            applicationId "com.example.groovy.pro"
+        }
+        arm { dimension "abi" }
+        x86 { dimension "abi" }
+    }
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+        }
+        release {
+            minifyEnabled false
+            if (project.hasProperty('x')) { signingConfig signingConfigs.debug }
+        }
+        staging {
+            initWith debug
+            applicationIdSuffix "staging"
+        }
+    }
+}
